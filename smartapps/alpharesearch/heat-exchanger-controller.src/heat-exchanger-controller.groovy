@@ -20,8 +20,8 @@ definition(
     description: "Turns heat exchanger on or off depending on out side temperature. ",
     category: "Green Living",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Developers/whole-house-fan.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Developers/whole-house-fan.png@2x.png",
-    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Developers/whole-house-fan.png@2x.png")
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Developers/whole-house-fan.png",
+    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Developers/whole-house-fan.png")
 
 preferences {
 	section("Monitor the temperature...") {
