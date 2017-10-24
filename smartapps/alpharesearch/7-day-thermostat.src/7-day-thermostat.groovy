@@ -36,11 +36,12 @@ preferences {
     section("Choose thermostat... ") {
         input "thermostat", "capability.thermostat"
     }
+    def off2 = new Date()
     section("Monday thru Friday Schedule") {
-        input ("timeWake", "time", title: "Wake Time of Day", defaultValue: "5:30")	
+        input ("timeWake", "time", title: "Wake Time of Day", defaultValue: off2)	
         input ("tempSetpointWakeHeat", "number", title: "Wake Heat Temp Degrees Fahrenheit?", defaultValue: "72")
         input ("tempSetpointWakeCool", "number", title: "Wake Cool Temp Degrees Fahrenheit?", defaultValue: "78")
-        input ("timeLeave", "time", title: "Leave Time of Day", defaultValue: "7:30")
+        input ("timeLeave", "time", title: "Leave Time of Day", defaultValue: "2:30")
         input ("tempSetpointLeaveHeat", "number", title: "Leave Heat Temp Degrees Fahrenheit?", defaultValue: "72")
         input ("tempSetpointLeaveCool", "number", title: "Leave Cool Temp Degrees Fahrenheit?", defaultValue: "78")
         input ("timeReturn", "time", title: "Return Time of Day", defaultValue: "17:30")
@@ -64,6 +65,9 @@ preferences {
         input ("tempSetpointSleepHeatWE", "number", title: "Sleep Heat Degrees Fahrenheit?", defaultValue: "72")
         input ("tempSetpointSleepCoolWE", "number", title: "Sleep Cool Degrees Fahrenheit?", defaultValue: "78")
     }
+    section("Vacation Mode switch...") {
+		input "switchVM", "capability.switch", required: false
+	}
 }
 
 def installed()
