@@ -31,38 +31,38 @@ preferences {
         input "temperatureSensor1", "capability.temperatureMeasurement"
     }
     section("Change HVAC mode to heat when the outside temperature <=...") {
-        input "temperature1", "number", title: "Temp Degrees Fahrenheit?"
+        input "temperature1", "number", title: "Temp Degrees Fahrenheit?", defaultValue: "50"
     }
     section("Choose thermostat... ") {
         input "thermostat", "capability.thermostat"
     }
     section("Monday thru Friday Schedule") {
-        input ("timeWake", "time", title: "Wake Time of Day")	
-        input ("tempSetpointWakeHeat", "number", title: "Wake Heat Temp Degrees Fahrenheit?")
-        input ("tempSetpointWakeCool", "number", title: "Wake Cool Temp Degrees Fahrenheit?")
-        input ("timeLeave", "time", title: "Leave Time of Day")
-        input ("tempSetpointLeaveHeat", "number", title: "Leave Heat Temp Degrees Fahrenheit?")
-        input ("tempSetpointLeaveCool", "number", title: "Leave Cool Temp Degrees Fahrenheit?")
-        input ("timeReturn", "time", title: "Return Time of Day")
-        input ("tempSetpointReturnHeat", "number", title: "Return Heat Degrees Fahrenheit?")
-        input ("tempSetpointReturnCool", "number", title: "Return Cool Degrees Fahrenheit?")
-        input ("timeSleep", "time", title: "Sleep Time of Day")
-        input ("tempSetpointSleepHeat", "number", title: "Sleep Heat Degrees Fahrenheit?")
-        input ("tempSetpointSleepCool", "number", title: "Sleep Cool Degrees Fahrenheit?")
+        input ("timeWake", "time", title: "Wake Time of Day", defaultValue: "5:30")	
+        input ("tempSetpointWakeHeat", "number", title: "Wake Heat Temp Degrees Fahrenheit?", defaultValue: "72")
+        input ("tempSetpointWakeCool", "number", title: "Wake Cool Temp Degrees Fahrenheit?", defaultValue: "78")
+        input ("timeLeave", "time", title: "Leave Time of Day", defaultValue: "7:30")
+        input ("tempSetpointLeaveHeat", "number", title: "Leave Heat Temp Degrees Fahrenheit?", defaultValue: "72")
+        input ("tempSetpointLeaveCool", "number", title: "Leave Cool Temp Degrees Fahrenheit?", defaultValue: "78")
+        input ("timeReturn", "time", title: "Return Time of Day", defaultValue: "17:30")
+        input ("tempSetpointReturnHeat", "number", title: "Return Heat Degrees Fahrenheit?", defaultValue: "72")
+        input ("tempSetpointReturnCool", "number", title: "Return Cool Degrees Fahrenheit?", defaultValue: "78")
+        input ("timeSleep", "time", title: "Sleep Time of Day", defaultValue: "22:30")
+        input ("tempSetpointSleepHeat", "number", title: "Sleep Heat Degrees Fahrenheit?", defaultValue: "72")
+        input ("tempSetpointSleepCool", "number", title: "Sleep Cool Degrees Fahrenheit?", defaultValue: "78")
     }
     section("Saturday and Sunday Schedule") {
-        input ("timeWakeWE", "time", title: "Wake Time of Day")	
-        input ("tempSetpointWakeHeatWE", "number", title: "Wake Heat Temp Degrees Fahrenheit?")
-        input ("tempSetpointWakeCoolWE", "number", title: "Wake Cool Temp Degrees Fahrenheit?")
-        input ("timeLeaveWE", "time", title: "Leave Time of Day")
-        input ("tempSetpointLeaveHeatWE", "number", title: "Leave Heat Temp Degrees Fahrenheit?")
-        input ("tempSetpointLeaveCoolWE", "number", title: "Leave Cool Temp Degrees Fahrenheit?")
-        input ("timeReturnWE", "time", title: "Return Time of Day")
-        input ("tempSetpointReturnHeatWE", "number", title: "Return Heat Degrees Fahrenheit?")
-        input ("tempSetpointReturnCoolWE", "number", title: "Return Cool Degrees Fahrenheit?")
-        input ("timeSleepWE", "time", title: "Sleep Time of Day")
-        input ("tempSetpointSleepHeatWE", "number", title: "Sleep Heat Degrees Fahrenheit?")
-        input ("tempSetpointSleepCoolWE", "number", title: "Sleep Cool Degrees Fahrenheit?")
+        input ("timeWakeWE", "time", title: "Wake Time of Day", defaultValue: "9:30")	
+        input ("tempSetpointWakeHeatWE", "number", title: "Wake Heat Temp Degrees Fahrenheit?", defaultValue: "72")
+        input ("tempSetpointWakeCoolWE", "number", title: "Wake Cool Temp Degrees Fahrenheit?", defaultValue: "78")
+        input ("timeLeaveWE", "time", title: "Leave Time of Day", defaultValue: "11:30")
+        input ("tempSetpointLeaveHeatWE", "number", title: "Leave Heat Temp Degrees Fahrenheit?", defaultValue: "72")
+        input ("tempSetpointLeaveCoolWE", "number", title: "Leave Cool Temp Degrees Fahrenheit?", defaultValue: "78")
+        input ("timeReturnWE", "time", title: "Return Time of Day", defaultValue: "16:30")
+        input ("tempSetpointReturnHeatWE", "number", title: "Return Heat Degrees Fahrenheit?", defaultValue: "72")
+        input ("tempSetpointReturnCoolWE", "number", title: "Return Cool Degrees Fahrenheit?", defaultValue: "78")
+        input ("timeSleepWE", "time", title: "Sleep Time of Day", defaultValue: "23:30")
+        input ("tempSetpointSleepHeatWE", "number", title: "Sleep Heat Degrees Fahrenheit?", defaultValue: "72")
+        input ("tempSetpointSleepCoolWE", "number", title: "Sleep Cool Degrees Fahrenheit?", defaultValue: "78")
     }
 }
 
