@@ -116,7 +116,7 @@ private send(msg) {
         }
     }
     else {
-        if (sendPushMessage != "1") {
+        if (sendPushMessage == "Yes") {
             log.debug("sending push message $sendPushMessage")
             sendPush(msg)
         }
