@@ -31,13 +31,14 @@ preferences {
         input "temperatureSensor1", "capability.temperatureMeasurement"
     }
     section("Change HVAC mode to heat when the outside temperature <=...") {
-        input "temperature1", "number", title: "Temp Degrees Fahrenheit?", defaultValue: "50"
+        input "temperatureH", "number", title: "Temp Degrees Fahrenheit Heat?", defaultValue: "60"
+        input "temperatureC", "number", title: "Temp Degrees Fahrenheit Cool?", defaultValue: "80"
     }
     section("Choose thermostat... ") {
         input "thermostat", "capability.thermostat"
     }
     def off2 = new Date()
-    section("Monday thru Friday Schedule") {
+    section("Sunday Sleep, Monday thru Friday Return Schedule") {
         input ("timeWake", "time", title: "Wake Time of Day", defaultValue: off2)	
         input ("tempSetpointWakeHeat", "number", title: "Wake Heat Temp Degrees Fahrenheit?", defaultValue: "72")
         input ("tempSetpointWakeCool", "number", title: "Wake Cool Temp Degrees Fahrenheit?", defaultValue: "78")
@@ -51,7 +52,7 @@ preferences {
         input ("tempSetpointSleepHeat", "number", title: "Sleep Heat Degrees Fahrenheit?", defaultValue: "72")
         input ("tempSetpointSleepCool", "number", title: "Sleep Cool Degrees Fahrenheit?", defaultValue: "78")
     }
-    section("Saturday and Sunday Schedule") {
+    section("Friday Sleep, Saturday (vacation mode locks in Saturday) and Sunday Return Schedule") {
         input ("timeWakeWE", "time", title: "Wake Time of Day", defaultValue: "9:30")	
         input ("tempSetpointWakeHeatWE", "number", title: "Wake Heat Temp Degrees Fahrenheit?", defaultValue: "72")
         input ("tempSetpointWakeCoolWE", "number", title: "Wake Cool Temp Degrees Fahrenheit?", defaultValue: "78")
@@ -143,39 +144,34 @@ def modeChangeHandler(evt) {
 	log.debug "Reinitializing thermostats on mode change notification, new mode $evt.value"
 	//sendNotificationEvent("$thermostats Reinitializing on mode change notification, new mode $evt.value")
     initialize()
+    temperatureHandler()
 }
 // This section sets the HVAC mode based outside temperature. HVAC fan mode is set to "auto".
 def temperatureHandler(evt) {
     def lastTemp = temperatureSensor1.currentTemperature
-    log.debug "temperature is: $lastTemp"
-    if (lastTemp <= temperature1) {
-        def thermostatState = thermostat.currentthermostatMode
-        def thermostatFan = thermostat.currentthermostatFanMode
-        if (thermostatState == "cool"){
-            def hvacmode = "heat"
-            log.debug "HVAC mode set to $hvacmode"
-            log.debug "HVAC Fan mode set to $thermostatFan"
-            thermostat.setThermostatMode(hvacmode)
-            if (thermostatFan != "auto"){
-                thermostat.setThermostatFanMode("auto")
-                log.debug "HVAC fan mode set to auto"
-            }
+    def thermostatState = thermostat.currentthermostatMode
+    def thermostatFan = thermostat.currentthermostatFanMode
+    log.debug "lastTemp: $lastTemp thermostatState:$thermostatState thermostatFan:$thermostatFan"
+
+	if (lastTemp <= temperatureH) {
+    	def hvacmode = "heat"
+        log.debug "HVAC mode set to $hvacmode"
+        thermostat.setThermostatMode(hvacmode)
         }
-        else if (thermostatFan != "auto"){
-            thermostat.setThermostatFanMode("auto")
-            log.debug "HVAC fan mode set to auto"
-        }
-	else {          
-            if (thermostatState == "heat"){
-                def hvacmode = "cool"
-                log.debug "HVAC mode set to $hvacmode"
-                thermostat.setThermostatMode(hvacmode)
-            }
-            if (thermostatFan != "auto"){
-                thermostat.setThermostatFanMode("auto")
-                log.debug "HVAC fan mode set to auto"
-            }
-        }
+    else if (lastTemp <= temperatureC) {
+  		def hvacmode = "auto"
+        log.debug "HVAC mode set to $hvacmode"
+        thermostat.setThermostatMode(hvacmode)
+    }
+    else {
+    def hvacmode = "cool"
+        log.debug "HVAC mode set to $hvacmode"
+        thermostat.setThermostatMode(hvacmode)
+    }
+    
+    if (thermostatFan != "auto"){
+    	//thermostat.setThermostatFanMode("auto")
+    	//log.debug "HVAC fan mode set to auto"
     }
 }
 
@@ -183,7 +179,7 @@ def temperatureHandler(evt) {
 def initialize() {
 	
     def calendar = Calendar.getInstance()
-    calendar.setTimeZone(TimeZone.getTimeZone("GMT-5"))
+    calendar.setTimeZone(TimeZone.getTimeZone("America/New_York"))
     def today = calendar.get(Calendar.DAY_OF_WEEK)
     log.debug("today=${today}")
 
@@ -226,6 +222,15 @@ def initialize() {
         break
     }
     
+    def currentState = switchVM.currentValue("switch")
+	if (currentState == "on") {
+    	log.debug("vacation mode $currentState today is now Saturday")
+        today = "Saturday"
+    }
+    if (currentState == "off") {
+    	log.debug("vacation mode $currentState")
+    }
+    
     log.debug("The day is $today")
 
     // This section is where the time/temperature shcedule is set.
@@ -257,7 +262,7 @@ def initialize() {
     	schedule(timeWake, changetempWeekWake)
         schedule(timeLeave, changetempWeekEndLeave)
         schedule(timeReturn, changetempWeekReturn)
-        schedule(timeSleep, changetempWeekSleep)
+        schedule(timeSleepWE, changetempWeekEndSleep)
     }
     if (today =="Saturday") {
         schedule(timeWakeWE, changetempWeekEndWake)
@@ -269,7 +274,7 @@ def initialize() {
     	schedule(timeWakeWE, changetempWeekEndWake)
         schedule(timeLeaveWE, changetempWeekEndLeave)
         schedule(timeReturnWE, changetempWeekEndReturn)
-        schedule(timeSleepWE, changetempWeekEndSleep)
+        schedule(timeSleep, changetempWeekSleep)
     }
 }
 
@@ -277,7 +282,11 @@ def initialize() {
 def changetempWeekWake() {
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "heat"){
+    if (thermostatState == "auto"){
+	thermostat.setHeatingSetpoint(tempSetpointWakeHeat)
+    thermostat.setCoolingSetpoint(tempSetpointWakeCool)
+    }
+    else if (thermostatState == "heat"){
 	thermostat.setHeatingSetpoint(tempSetpointWakeHeat)
     }
     else {
@@ -287,7 +296,11 @@ def changetempWeekWake() {
 def changetempWeekLeave() {
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "heat"){
+    if (thermostatState == "auto"){
+	thermostat.setHeatingSetpoint(tempSetpointLeaveHeat)
+    thermostat.setCoolingSetpoint(tempSetpointLeaveCool)
+    }
+    else if (thermostatState == "heat"){
 	thermostat.setHeatingSetpoint(tempSetpointLeaveHeat)
     }
     else {
@@ -297,7 +310,11 @@ def changetempWeekLeave() {
 def changetempWeekReturn() {
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "heat"){
+    if (thermostatState == "auto"){
+	thermostat.setHeatingSetpoint(tempSetpointReturnHeat)
+    thermostat.setCoolingSetpoint(tempSetpointReturnCool)
+    }
+    else if (thermostatState == "heat"){
 	thermostat.setHeatingSetpoint(tempSetpointReturnHeat)
     }
     else {
@@ -307,7 +324,11 @@ def changetempWeekReturn() {
 def changetempWeekSleep() {
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "heat"){
+    if (thermostatState == "auto"){
+	thermostat.setHeatingSetpoint(tempSetpointSleepHeat)
+    thermostat.setCoolingSetpoint(tempSetpointSleepCool)
+    }
+    else if (thermostatState == "heat"){
 	thermostat.setHeatingSetpoint(tempSetpointSleepHeat)
     }
     else {
@@ -318,7 +339,11 @@ def changetempWeekSleep() {
 def changetempWeekEndWake() {
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "heat"){
+    if (thermostatState == "auto"){
+	thermostat.setHeatingSetpoint(tempSetpointWakeHeatWE)
+    thermostat.setCoolingSetpoint(tempSetpointWakeCoolWE)
+    }
+    else if (thermostatState == "heat"){
 	thermostat.setHeatingSetpoint(tempSetpointWakeHeatWE)
     }
     else {
@@ -328,7 +353,11 @@ def changetempWeekEndWake() {
 def changetempWeekEndLeave() {
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "heat"){
+    if (thermostatState == "auto"){
+	thermostat.setHeatingSetpoint(tempSetpointLeaveHeatWE)
+    thermostat.setCoolingSetpoint(tempSetpointLeaveCoolWE)
+    }
+    else if (thermostatState == "heat"){
 	thermostat.setHeatingSetpoint(tempSetpointLeaveHeatWE)
     }
     else {
@@ -338,7 +367,11 @@ def changetempWeekEndLeave() {
 def changetempWeekEndReturn() {
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "heat"){
+    if (thermostatState == "auto"){
+	thermostat.setHeatingSetpoint(tempSetpointReturnHeatWE)
+    thermostat.setCoolingSetpoint(tempSetpointReturnCoolWE)
+    }
+    else if (thermostatState == "heat"){
 	thermostat.setHeatingSetpoint(tempSetpointReturnHeatWE)
     }
     else {
@@ -348,7 +381,11 @@ def changetempWeekEndReturn() {
 def changetempWeekEndSleep() {
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "heat"){
+	if (thermostatState == "auto"){
+	thermostat.setHeatingSetpoint(tempSetpointSleepHeatWE)
+    thermostat.setCoolingSetpoint(tempSetpointSleepCoolWE)
+    }
+    else if (thermostatState == "heat"){
 	thermostat.setHeatingSetpoint(tempSetpointSleepHeatWE)
     }
     else {
