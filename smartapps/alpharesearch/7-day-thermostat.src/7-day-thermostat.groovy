@@ -31,40 +31,39 @@ preferences {
         input "temperatureSensor1", "capability.temperatureMeasurement"
     }
     section("Change HVAC mode to heat when the outside temperature <=...") {
-        input "temperatureH", "number", title: "Temp Degrees Fahrenheit Heat?", defaultValue: "60"
-        input "temperatureC", "number", title: "Temp Degrees Fahrenheit Cool?", defaultValue: "80"
+        input "temperatureH", "number", title: "Temp Degrees Fahrenheit Heat?", defaultValue: "50"
+        input "temperatureC", "number", title: "Temp Degrees Fahrenheit Cool?", defaultValue: "90"
     }
     section("Choose thermostat... ") {
         input "thermostat", "capability.thermostat"
     }
-    def off2 = new Date()
     section("Sunday Sleep, Monday thru Friday Return Schedule") {
-        input ("timeWake", "time", title: "Wake Time of Day", defaultValue: off2)	
-        input ("tempSetpointWakeHeat", "number", title: "Wake Heat Temp Degrees Fahrenheit?", defaultValue: "72")
+        input ("timeWake", "time", title: "Wake Time of Day", defaultValue: "2015-01-09T05:00:00.000-0500")	
+        input ("tempSetpointWakeHeat", "number", title: "Wake Heat Temp Degrees Fahrenheit?", defaultValue: "68")
         input ("tempSetpointWakeCool", "number", title: "Wake Cool Temp Degrees Fahrenheit?", defaultValue: "78")
-        input ("timeLeave", "time", title: "Leave Time of Day", defaultValue: "2:30")
-        input ("tempSetpointLeaveHeat", "number", title: "Leave Heat Temp Degrees Fahrenheit?", defaultValue: "72")
-        input ("tempSetpointLeaveCool", "number", title: "Leave Cool Temp Degrees Fahrenheit?", defaultValue: "78")
-        input ("timeReturn", "time", title: "Return Time of Day", defaultValue: "17:30")
+        input ("timeLeave", "time", title: "Leave Time of Day", defaultValue: "2015-01-09T05:45:00.000-0500")
+        input ("tempSetpointLeaveHeat", "number", title: "Leave Heat Temp Degrees Fahrenheit?", defaultValue: "70")
+        input ("tempSetpointLeaveCool", "number", title: "Leave Cool Temp Degrees Fahrenheit?", defaultValue: "76")
+        input ("timeReturn", "time", title: "Return Time of Day", defaultValue: "2015-01-09T06:00:00.000-0500")
         input ("tempSetpointReturnHeat", "number", title: "Return Heat Degrees Fahrenheit?", defaultValue: "72")
-        input ("tempSetpointReturnCool", "number", title: "Return Cool Degrees Fahrenheit?", defaultValue: "78")
-        input ("timeSleep", "time", title: "Sleep Time of Day", defaultValue: "22:30")
-        input ("tempSetpointSleepHeat", "number", title: "Sleep Heat Degrees Fahrenheit?", defaultValue: "72")
-        input ("tempSetpointSleepCool", "number", title: "Sleep Cool Degrees Fahrenheit?", defaultValue: "78")
+        input ("tempSetpointReturnCool", "number", title: "Return Cool Degrees Fahrenheit?", defaultValue: "74")
+        input ("timeSleep", "time", title: "Sleep Time of Day", defaultValue: "2015-01-09T22:00:00.000-0500")
+        input ("tempSetpointSleepHeat", "number", title: "Sleep Heat Degrees Fahrenheit?", defaultValue: "64")
+        input ("tempSetpointSleepCool", "number", title: "Sleep Cool Degrees Fahrenheit?", defaultValue: "82")
     }
     section("Friday Sleep, Saturday (vacation mode locks in Saturday) and Sunday Return Schedule") {
-        input ("timeWakeWE", "time", title: "Wake Time of Day", defaultValue: "9:30")	
-        input ("tempSetpointWakeHeatWE", "number", title: "Wake Heat Temp Degrees Fahrenheit?", defaultValue: "72")
+        input ("timeWakeWE", "time", title: "Wake Time of Day", defaultValue: "2015-01-09T08:00:00.000-0500")	
+        input ("tempSetpointWakeHeatWE", "number", title: "Wake Heat Temp Degrees Fahrenheit?", defaultValue: "68")
         input ("tempSetpointWakeCoolWE", "number", title: "Wake Cool Temp Degrees Fahrenheit?", defaultValue: "78")
-        input ("timeLeaveWE", "time", title: "Leave Time of Day", defaultValue: "11:30")
-        input ("tempSetpointLeaveHeatWE", "number", title: "Leave Heat Temp Degrees Fahrenheit?", defaultValue: "72")
+        input ("timeLeaveWE", "time", title: "Leave Time of Day", defaultValue: "2015-01-09T09:00:00.000-0500")
+        input ("tempSetpointLeaveHeatWE", "number", title: "Leave Heat Temp Degrees Fahrenheit?", defaultValue: "70")
         input ("tempSetpointLeaveCoolWE", "number", title: "Leave Cool Temp Degrees Fahrenheit?", defaultValue: "78")
-        input ("timeReturnWE", "time", title: "Return Time of Day", defaultValue: "16:30")
+        input ("timeReturnWE", "time", title: "Return Time of Day", defaultValue: "2015-01-09T10:00:00.000-0500")
         input ("tempSetpointReturnHeatWE", "number", title: "Return Heat Degrees Fahrenheit?", defaultValue: "72")
-        input ("tempSetpointReturnCoolWE", "number", title: "Return Cool Degrees Fahrenheit?", defaultValue: "78")
-        input ("timeSleepWE", "time", title: "Sleep Time of Day", defaultValue: "23:30")
-        input ("tempSetpointSleepHeatWE", "number", title: "Sleep Heat Degrees Fahrenheit?", defaultValue: "72")
-        input ("tempSetpointSleepCoolWE", "number", title: "Sleep Cool Degrees Fahrenheit?", defaultValue: "78")
+        input ("tempSetpointReturnCoolWE", "number", title: "Return Cool Degrees Fahrenheit?", defaultValue: "74")
+        input ("timeSleepWE", "time", title: "Sleep Time of Day", defaultValue: "2015-01-09T23:30:00.000-0500")
+        input ("tempSetpointSleepHeatWE", "number", title: "Sleep Heat Degrees Fahrenheit?", defaultValue: "64")
+        input ("tempSetpointSleepCoolWE", "number", title: "Sleep Cool Degrees Fahrenheit?", defaultValue: "82")
     }
     section("Vacation Mode switch...") {
 		input "switchVM", "capability.switch", required: false
@@ -141,10 +140,8 @@ def updated()
     initialize()
 }
 def modeChangeHandler(evt) {
-	log.debug "Reinitializing thermostats on mode change notification, new mode $evt.value"
-	//sendNotificationEvent("$thermostats Reinitializing on mode change notification, new mode $evt.value")
+	log.debug "Reinitializing thermostats on new mode $evt.value"
     initialize()
-    temperatureHandler()
 }
 // This section sets the HVAC mode based outside temperature. HVAC fan mode is set to "auto".
 def temperatureHandler(evt) {
@@ -222,6 +219,7 @@ def initialize() {
         break
     }
     
+if(switchVM != null){
     def currentState = switchVM.currentValue("switch")
 	if (currentState == "on") {
     	log.debug("vacation mode $currentState today is now Saturday")
@@ -230,7 +228,7 @@ def initialize() {
     if (currentState == "off") {
     	log.debug("vacation mode $currentState")
     }
-    
+    }
     log.debug("The day is $today")
 
     // This section is where the time/temperature shcedule is set.
