@@ -68,6 +68,9 @@ preferences {
     section("Vacation Mode switch (everyday uses Saturday schedule)...") {
 		input "switchVM", "capability.switch", required: false
 	}
+    section("Turn AC zone off at sleep and on at wake...") {
+		input "switchAC", "capability.switch", required: false
+	}
     section("Extra AUX switch (turns switch on when the outside temp is <)...") {
 		input "switchAUX", "capability.switch", required: false
         input "temperatureAUXOn", "number", title: "Temp Degrees Fahrenheit turn on <?", defaultValue: "20",required: false
@@ -415,6 +418,10 @@ def initialize() {
 
 // This section is where the thermostat temperature settings are set. 
 def changetempWeekWake() {
+	if(switchAC != null) {
+    	log.debug "switchAC On"
+    	switchAC.on()
+    }
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
     if (thermostatState == "auto"){
@@ -460,6 +467,10 @@ def changetempWeekReturn() {
     log.debug "updating setpoints"
 }
 def changetempWeekSleep() {
+	if(switchAC != null) {
+    	log.debug "switchAC Off"
+    	switchAC.off()
+    }
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
     if (thermostatState == "auto"){
@@ -476,6 +487,10 @@ def changetempWeekSleep() {
 }
 
 def changetempWeekEndWake() {
+	if(switchAC != null) {
+    	log.debug "switchAC On"
+    	switchAC.on()
+    }
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
     if (thermostatState == "auto"){
@@ -521,6 +536,10 @@ def changetempWeekEndReturn() {
     log.debug "updating setpoints"
 }
 def changetempWeekEndSleep() {
+	if(switchAC != null) {
+    	log.debug "switchAC Off"
+    	switchAC.off()
+    }
     def thermostatState = thermostat.currentthermostatMode
     log.debug "checking mode request = $thermostatState"
 	if (thermostatState == "auto"){
