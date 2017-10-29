@@ -166,10 +166,10 @@ def temperatureHandler(evt) {
     	log.debug("switch for AUX is $currentState")
         if (lastTemp <= temperatureAUXOn) {
     		switchAUX.on()
-       	 	log.debug "set AUX ON"
+       	 	log.debug "set AUX to ON"
         } else if (lastTemp >= temperatureAUXOff) {
         	switchAUX.off()
-       	 	log.debug "set AUX OFF"
+       	 	log.debug "set AUX to OFF"
         }
     }
 }
