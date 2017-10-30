@@ -38,13 +38,13 @@ preferences {
         input "thermostat", "capability.thermostat"
     }
     section("Sunday Sleep, Monday thru Friday Return Schedule") {
-        input ("timeWake", "time", title: "Wake Time of Day", defaultValue: "2015-01-09T05:00:00.000-0500")	
+        input ("timeWake", "time", title: "Wake Time of Day", defaultValue: "2015-01-09T04:45:00.000-0500")	
         input ("tempSetpointWakeHeat", "number", title: "Wake Heat Temp Degrees Fahrenheit?", defaultValue: "68")
         input ("tempSetpointWakeCool", "number", title: "Wake Cool Temp Degrees Fahrenheit?", defaultValue: "78")
-        input ("timeLeave", "time", title: "Leave Time of Day", defaultValue: "2015-01-09T05:45:00.000-0500")
+        input ("timeLeave", "time", title: "Leave Time of Day", defaultValue: "2015-01-09T05:30:00.000-0500")
         input ("tempSetpointLeaveHeat", "number", title: "Leave Heat Temp Degrees Fahrenheit?", defaultValue: "70")
         input ("tempSetpointLeaveCool", "number", title: "Leave Cool Temp Degrees Fahrenheit?", defaultValue: "76")
-        input ("timeReturn", "time", title: "Return Time of Day", defaultValue: "2015-01-09T06:00:00.000-0500")
+        input ("timeReturn", "time", title: "Return Time of Day", defaultValue: "2015-01-09T07:00:00.000-0500")
         input ("tempSetpointReturnHeat", "number", title: "Return Heat Degrees Fahrenheit?", defaultValue: "72")
         input ("tempSetpointReturnCool", "number", title: "Return Cool Degrees Fahrenheit?", defaultValue: "74")
         input ("timeSleep", "time", title: "Sleep Time of Day", defaultValue: "2015-01-09T22:00:00.000-0500")
@@ -73,15 +73,17 @@ preferences {
 	}
     section("Extra AUX switch (turns switch on when the outside temp is <)...") {
 		input "switchAUX", "capability.switch", required: false
+        input "temperatureAUXOnOn", "bool", title: "Auto AUX ON", defaultValue:true, required: false
         input "temperatureAUXOn", "number", title: "Temp Degrees Fahrenheit turn on <?", defaultValue: "20",required: false
-        input "temperatureAUXOff", "number", title: "Temp Degrees Fahrenheit turn off >?", defaultValue: "30",required: false
+        input "temperatureAUXOffOff", "bool", title: "Auto AUX OFF", defaultValue:true, required: false
+        input "temperatureAUXOff", "number", title: "Temp Degrees Fahrenheit turn off >?", defaultValue: "45",required: false
 	}
     section("When all of these people leave home") {
         input "people", "capability.presenceSensor", multiple: true, required: false
     }
     section("Change to this temperatures") {
-        input ("tempSetpointGoneHeat", "number", title: "Gone Heat Degrees Fahrenheit?", defaultValue: "64")
-        input ("tempSetpointGoneCool", "number", title: "Gone Cool Degrees Fahrenheit?", defaultValue: "82")
+        input ("tempSetpointGoneHeat", "number", title: "Gone Heat Degrees Fahrenheit?", defaultValue: "68")
+        input ("tempSetpointGoneCool", "number", title: "Gone Cool Degrees Fahrenheit?", defaultValue: "80")
     }
     section("False alarm threshold (defaults to 10 min)") {
         input "falseAlarmThreshold", "decimal", title: "Number of minutes", defaultValue: "10"
@@ -166,13 +168,19 @@ def temperatureHandler(evt) {
     
     if(switchAUX != null){
     	def currentState = switchAUX.currentValue("switch")
-    	log.debug("switch for AUX is $currentState")
+    	log.debug("switch for AUX is $currentState, on bool:$temperatureAUXOnOn off bool:$temperatureAUXOffOff")
         if (lastTemp <= temperatureAUXOn) {
-    		switchAUX.on()
-       	 	log.debug "set AUX to ON"
+    		if(temperatureAUXOnOn) {
+            	switchAUX.on()
+                log.debug "set AUX to ON"
+                }
+       	 	
         } else if (lastTemp >= temperatureAUXOff) {
-        	switchAUX.off()
-       	 	log.debug "set AUX to OFF"
+        	if(temperatureAUXOffOff) {
+            	switchAUX.off()
+                log.debug "set AUX to OFF"
+                }
+       	 	
         }
     }
 }
