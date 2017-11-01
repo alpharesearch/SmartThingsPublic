@@ -31,17 +31,17 @@ preferences {
         input "temperatureSensor1", "capability.temperatureMeasurement"
     }
     section("Change HVAC mode to heat or cool if outside temperature... inbetween is set to auto") {
-        input "temperatureH", "number", title: "Temp Degrees Fahrenheit < Heat?", defaultValue: "50"
-        input "temperatureC", "number", title: "Temp Degrees Fahrenheit > Cool?", defaultValue: "90"
+        input "temperatureH", "number", title: "Temp Degrees Fahrenheit < Heat?", defaultValue: "60"
+        input "temperatureC", "number", title: "Temp Degrees Fahrenheit > Cool?", defaultValue: "80"
     }
     section("Choose thermostat... ") {
         input "thermostat", "capability.thermostat"
     }
     section("Sunday Sleep, Monday thru Friday Return Schedule") {
-        input ("timeWake", "time", title: "Wake Time of Day", defaultValue: "2015-01-09T04:45:00.000-0500")	
+        input ("timeWake", "time", title: "Wake Time of Day", defaultValue: "2015-01-09T05:00:00.000-0500")	
         input ("tempSetpointWakeHeat", "number", title: "Wake Heat Temp Degrees Fahrenheit?", defaultValue: "68")
         input ("tempSetpointWakeCool", "number", title: "Wake Cool Temp Degrees Fahrenheit?", defaultValue: "78")
-        input ("timeLeave", "time", title: "Leave Time of Day", defaultValue: "2015-01-09T05:30:00.000-0500")
+        input ("timeLeave", "time", title: "Leave Time of Day", defaultValue: "2015-01-09T05:40:00.000-0500")
         input ("tempSetpointLeaveHeat", "number", title: "Leave Heat Temp Degrees Fahrenheit?", defaultValue: "70")
         input ("tempSetpointLeaveCool", "number", title: "Leave Cool Temp Degrees Fahrenheit?", defaultValue: "76")
         input ("timeReturn", "time", title: "Return Time of Day", defaultValue: "2015-01-09T07:00:00.000-0500")
@@ -110,34 +110,14 @@ def setup()
     
     subscribe(temperatureSensor1, "temperature", temperatureHandler)
     subscribe(thermostat, "thermostat", thermostatHandler)
-    subscribe(thermostat, "tempSetpointWakeHeat", HeatingSetpoint1Handler)
-    subscribe(thermostat, "tempSetpointLeaveHeat", HeatingSetpoint2Handler)
-    subscribe(thermostat, "tempSetpointReturnHeat", HeatingSetpoint3Handler)
-    subscribe(thermostat, "tempSetpointSleepHeat", HeatingSetpoint4Handler)
-    subscribe(thermostat, "tempSetpointGoneHeat", HeatingSetpoint5Handler)
-
-    subscribe(thermostat, "tempSetpointWakeHeatWE", HeatingSetpoint11Handler)
-    subscribe(thermostat, "tempSetpointLeaveHeatWE", HeatingSetpoint21Handler)
-    subscribe(thermostat, "tempSetpointReturnHeatWE", HeatingSetpoint31Handler)
-    subscribe(thermostat, "tempSetpointSleepHeatWE", HeatingSetpoint41Handler)
- 
-    subscribe(thermostat, "tempSetpointWakeCool", CoolingSetpoint1Handler)
-    subscribe(thermostat, "tempSetpointLeaveCool", CoolingSetpoint2Handler)
-    subscribe(thermostat, "tempSetpointReturnCool", CoolingSetpoint3Handler)
-    subscribe(thermostat, "tempSetpointSleepCool", CoolingSetpoint4Handler)
-    subscribe(thermostat, "tempSetpointGoneCool", CoolingSetpoint5Handler)
-
-    subscribe(thermostat, "tempSetpointWakeCoolWE", CoolingSetpointA1Handler)
-    subscribe(thermostat, "tempSetpointLeaveCoolWE", CoolingSetpointA2Handler)
-    subscribe(thermostat, "tempSetpointReturnCoolWE", CoolingSetpointA3Handler)
-    subscribe(thermostat, "tempSetpointSleepCoolWE", CoolingSetpointA4Handler)
-    
     subscribe(people, "presence", presence)
 }
+
 def modeChangeHandler(evt) {
 	log.debug "Reinitializing thermostats on new mode $evt.value"
     initialize()
 }
+
 // This section sets the HVAC mode based outside temperature. HVAC fan mode is set to "auto".
 def temperatureHandler(evt) {
     def lastTemp = temperatureSensor1.currentTemperature
