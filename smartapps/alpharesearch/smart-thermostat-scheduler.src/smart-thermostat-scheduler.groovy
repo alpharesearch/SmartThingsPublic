@@ -216,11 +216,13 @@ def initialize() {
     }
     
     unschedule()
-    
+    log.debug("unschedule")
     schedule("2015-01-09T00:00:00.000-0500", "initialize")
+	log.debug("schedule initialize for 00:00:00.000")	
 
     // This section is where the time/temperature schedule is set.
    if (today == "Monday") {
+   log.debug("Monday selected")
     	if (timeOfDayIsBetween("2015-01-09T00:00:00.000-0500", timeWake, new Date(), location.timeZone)) {
      		log.debug("0:00 to wake")
             changetempWeekSleep()
@@ -246,7 +248,9 @@ def initialize() {
         schedule(timeReturn, changetempWeekReturn)
         schedule(timeSleep, changetempWeekSleep)
     }
+   
    if (today =="Tuesday") {
+   log.debug("Tuesday selected")
     if (timeOfDayIsBetween("2015-01-09T00:00:00.000-0500", timeWake, new Date(), location.timeZone)) {
      		log.debug("0:00 to wake")
             changetempWeekSleep()
@@ -272,7 +276,9 @@ def initialize() {
         schedule(timeReturn, changetempWeekReturn)
         schedule(timeSleep, changetempWeekSleep)
     }
+   
    if (today =="Wednesday") {
+   log.debug("Wednesday selected")
     if (timeOfDayIsBetween("2015-01-09T00:00:00.000-0500", timeWake, new Date(), location.timeZone)) {
      		log.debug("0:00 to wake")
             changetempWeekSleep()
@@ -298,7 +304,9 @@ def initialize() {
         schedule(timeReturn, changetempWeekReturn)
         schedule(timeSleep, changetempWeekSleep)
     }
-   if (today =="Thrusday") {
+   
+   if (today =="Thursday") {
+   log.debug("Thrusday selected")
     if (timeOfDayIsBetween("2015-01-09T00:00:00.000-0500", timeWake, new Date(), location.timeZone)) {
      		log.debug("0:00 to wake")
             changetempWeekSleep()
@@ -324,7 +332,9 @@ def initialize() {
         schedule(timeReturn, changetempWeekReturn)
         schedule(timeSleep, changetempWeekSleep)
     }
+   
    if (today =="Friday") {
+   log.debug("Friday selected")
     if (timeOfDayIsBetween("2015-01-09T00:00:00.000-0500", timeWake, new Date(), location.timeZone)) {
      		log.debug("0:00 to wake")
             changetempWeekSleep()
@@ -350,7 +360,9 @@ def initialize() {
         schedule(timeReturn, changetempWeekReturn)
         schedule(timeSleepWE, changetempWeekEndSleep)
     }
+   
    if (today =="Saturday") {
+   log.debug("Saturday selected")
     	if (timeOfDayIsBetween("2015-01-09T00:00:00.000-0500", timeWakeWE, new Date(), location.timeZone)) {
      		log.debug("0:00 to wake")
             changetempWeekEndSleep()
@@ -376,7 +388,9 @@ def initialize() {
         schedule(timeReturnWE, changetempWeekEndReturn)
         schedule(timeSleepWE, changetempWeekEndSleep)
     }
+   
    if (today =="Sunday") {
+   log.debug("Sunday selected")
     if (timeOfDayIsBetween("2015-01-09T00:00:00.000-0500", timeWakeWE, new Date(), location.timeZone)) {
      		log.debug("0:00 to wake")
             changetempWeekEndSleep()
@@ -601,7 +615,7 @@ private someoneIsBack() {
             break
         }
     }
-    log.debug "everyoneIsAway: $result"
+    log.debug "someoneIsBack: $result"
     return result
 }
 
@@ -626,7 +640,7 @@ def takeAction() {
         log.debug "Found ${awayLongEnough.size()} out of ${people.size()} person(s) who were away long enough"
         if (awayLongEnough.size() == people.size()) {
             //def message = "${app.label} changed your mode to '${newMode}' because everyone left home"
-            def message = "SmartThings changed your mode to '${newMode}' because everyone left home"
+            def message = "${app.label} Everyone left home, change temperature via changetempGone ${tempSetpointGoneHeat} ${tempSetpointGoneCool}"
             log.info message
             changetempGone()
         } else {
