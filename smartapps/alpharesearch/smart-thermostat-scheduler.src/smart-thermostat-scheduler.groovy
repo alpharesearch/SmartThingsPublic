@@ -67,8 +67,8 @@ preferences {
     }
     section("Change to this mode") {
         input "newModeWake", "mode", title: "Mode Wake?", defaultValue: "Home"
-        input "newModeLeave", "mode", title: "Mode Wake?", defaultValue: "Home"
-        input "newModeReturn", "mode", title: "Mode Wake?", defaultValue: "Home"
+        input "newModeLeave", "mode", title: "Mode Leave?", defaultValue: "Home"
+        input "newModeReturn", "mode", title: "Mode Return?", defaultValue: "Home"
         input "newModeSleep", "mode", title: "Mode Sleep?", defaultValue: "Night"
         input "newModeAway", "mode", title: "Mode Away?", defaultValue: "Away"
     }
