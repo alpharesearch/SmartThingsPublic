@@ -65,6 +65,13 @@ preferences {
         input ("tempSetpointSleepHeatWE", "number", title: "Sleep Heat Degrees Fahrenheit?", defaultValue: "64")
         input ("tempSetpointSleepCoolWE", "number", title: "Sleep Cool Degrees Fahrenheit?", defaultValue: "82")
     }
+    section("Change to this mode") {
+        input "newModeWake", "mode", title: "Mode Wake?", defaultValue: "Home"
+        input "newModeLeave", "mode", title: "Mode Wake?", defaultValue: "Home"
+        input "newModeReturn", "mode", title: "Mode Wake?", defaultValue: "Home"
+        input "newModeSleep", "mode", title: "Mode Sleep?", defaultValue: "Night"
+        input "newModeAway", "mode", title: "Mode Away?", defaultValue: "Away"
+    }
     section("Vacation Mode switch (everyday uses Saturday schedule)...") {
 		input "switchVM", "capability.switch", required: false
 	}
@@ -433,6 +440,7 @@ def changetempWeekWake() {
 		thermostat.setCoolingSetpoint(tempSetpointWakeCool)
     }
     log.debug "updating setpoints"
+    changeMode(newModeWake)
 }
 def changetempWeekLeave() {
     def thermostatState = thermostat.currentthermostatMode
@@ -448,6 +456,7 @@ def changetempWeekLeave() {
 		thermostat.setCoolingSetpoint(tempSetpointLeaveCool)
     }
     log.debug "updating setpoints"
+    changeMode(newModeLeave)
 }
 def changetempWeekReturn() {
     def thermostatState = thermostat.currentthermostatMode
@@ -467,6 +476,7 @@ def changetempWeekReturn() {
 		thermostat.setCoolingSetpoint(tempSetpointReturnCool)
     }
     log.debug "updating setpoints"
+    changeMode(newModeReturn)
 }
 def changetempWeekSleep() {
     def thermostatState = thermostat.currentthermostatMode
@@ -486,6 +496,7 @@ def changetempWeekSleep() {
 		thermostat.setCoolingSetpoint(tempSetpointSleepCool)
     }
     log.debug "updating setpoints"
+    changeMode(newModeSleep)
 }
 
 def changetempWeekEndWake() {
@@ -502,6 +513,7 @@ def changetempWeekEndWake() {
 		thermostat.setCoolingSetpoint(tempSetpointWakeCoolWE)
     }
     log.debug "updating setpoints"
+    changeMode(newModeWake)
 }
 def changetempWeekEndLeave() {
     def thermostatState = thermostat.currentthermostatMode
@@ -517,6 +529,7 @@ def changetempWeekEndLeave() {
 		thermostat.setCoolingSetpoint(tempSetpointLeaveCoolWE)
     }
     log.debug "updating setpoints"
+    changeMode(newModeLeave)
 }
 def changetempWeekEndReturn() {
     def thermostatState = thermostat.currentthermostatMode
@@ -536,6 +549,7 @@ def changetempWeekEndReturn() {
 		thermostat.setCoolingSetpoint(tempSetpointReturnCoolWE)
     }
     log.debug "updating setpoints"
+    changeMode(newModeReturn)
 }
 def changetempWeekEndSleep() {
     def thermostatState = thermostat.currentthermostatMode
@@ -555,6 +569,7 @@ def changetempWeekEndSleep() {
 		thermostat.setCoolingSetpoint(tempSetpointSleepCoolWE)
     }
     log.debug "updating setpoints"
+    changeMode(newModeSleep)
 }
 def changetempGone() {
     def thermostatState = thermostat.currentthermostatMode
@@ -570,6 +585,7 @@ def changetempGone() {
 		thermostat.setCoolingSetpoint(tempSetpointGoneCool)
     }
     log.debug "updating setpoints"
+    changeMode(newModeAway)
 }
 
 def presence(evt) {
@@ -651,3 +667,14 @@ def takeAction() {
     }
 }
 
+def changeMode(newMode) {
+    log.debug "changeMode, location.mode = $location.mode, newMode = $newMode, location.modes = $location.modes"
+
+    if (location.mode != newMode) {
+        if (location.modes?.find{it.name == newMode}) {
+            setLocationMode(newMode)
+        }  else {
+            log.warn "Tried to change to undefined mode '${newMode}'"
+        }
+    }
+}
