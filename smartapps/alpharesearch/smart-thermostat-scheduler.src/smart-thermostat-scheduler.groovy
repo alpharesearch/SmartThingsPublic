@@ -27,6 +27,9 @@ definition(
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/GreenLiving/Cat-GreenLiving@3x.png")
 
 preferences {
+	section("Activate or deactivate Smart Thermostat Scheduler") {
+		input "switchON", "capability.switch", required: true
+	}
     section("Monitor the outside temperature...") {
         input "temperatureSensor1", "capability.temperatureMeasurement"
     }
@@ -127,48 +130,57 @@ def modeChangeHandler(evt) {
 
 // This section sets the HVAC mode based outside temperature. HVAC fan mode is set to "auto".
 def temperatureHandler(evt) {
-    def lastTemp = temperatureSensor1.currentTemperature
-    def thermostatState = thermostat.currentthermostatMode
-    def thermostatFan = thermostat.currentthermostatFanMode
-    log.debug "lastTemp: $lastTemp thermostatState:$thermostatState thermostatFan:$thermostatFan"
+if(switchON != null){
+    	def currentStateON = switchON.currentValue("switch")
+		if (currentStateON == "on") {
+    		log.debug("switchON: $currentStateON")
+                def lastTemp = temperatureSensor1.currentTemperature
+                def thermostatState = thermostat.currentthermostatMode
+                def thermostatFan = thermostat.currentthermostatFanMode
+                log.debug "lastTemp: $lastTemp thermostatState:$thermostatState thermostatFan:$thermostatFan"
 
-	if (lastTemp <= temperatureH) {
-    	def hvacmode = "heat"
-        log.debug "HVAC mode set to $hvacmode"
-        thermostat.setThermostatMode(hvacmode)
-        }
-    else if (lastTemp <= temperatureC) {
-  		def hvacmode = "auto"
-        log.debug "HVAC mode set to $hvacmode"
-        thermostat.setThermostatMode(hvacmode)
-    }
-    else {
-    def hvacmode = "cool"
-        log.debug "HVAC mode set to $hvacmode"
-        thermostat.setThermostatMode(hvacmode)
-    }
-    
-    if (thermostatFan != "auto"){
-    	//thermostat.setThermostatFanMode("auto")
-    	//log.debug "HVAC fan mode set to auto"
-    }
-    
-    if(switchAUX != null){
-    	def currentState = switchAUX.currentValue("switch")
-    	log.debug("switch for AUX is $currentState, on bool:$temperatureAUXOnOn off bool:$temperatureAUXOffOff")
-        if (lastTemp <= temperatureAUXOn) {
-    		if(temperatureAUXOnOn) {
-            	switchAUX.on()
-                log.debug "set AUX to ON"
+                if (lastTemp <= temperatureH) {
+                    def hvacmode = "heat"
+                    log.debug "HVAC mode set to $hvacmode"
+                    thermostat.setThermostatMode(hvacmode)
+                    }
+                else if (lastTemp <= temperatureC) {
+                    def hvacmode = "auto"
+                    log.debug "HVAC mode set to $hvacmode"
+                    thermostat.setThermostatMode(hvacmode)
                 }
-       	 	
-        } else if (lastTemp >= temperatureAUXOff) {
-        	if(temperatureAUXOffOff) {
-            	switchAUX.off()
-                log.debug "set AUX to OFF"
+                else {
+                def hvacmode = "cool"
+                    log.debug "HVAC mode set to $hvacmode"
+                    thermostat.setThermostatMode(hvacmode)
                 }
-       	 	
-        }
+
+                if (thermostatFan != "auto"){
+                    //thermostat.setThermostatFanMode("auto")
+                    //log.debug "HVAC fan mode set to auto"
+                }
+
+                if(switchAUX != null){
+                    def currentState = switchAUX.currentValue("switch")
+                    log.debug("switch for AUX is $currentState, on bool:$temperatureAUXOnOn off bool:$temperatureAUXOffOff")
+                    if (lastTemp <= temperatureAUXOn) {
+                        if(temperatureAUXOnOn) {
+                            switchAUX.on()
+                            log.debug "set AUX to ON"
+                            }
+
+                    } else if (lastTemp >= temperatureAUXOff) {
+                        if(temperatureAUXOffOff) {
+                            switchAUX.off()
+                            log.debug "set AUX to OFF"
+                            }
+
+                    }
+                }
+    	}
+    	if (currentStateON == "off") {
+    		log.debug("switchON: $currentStateON")
+    	}
     }
 }
 
@@ -427,165 +439,246 @@ def initialize() {
 
 // This section is where the thermostat temperature settings are set. 
 def changetempWeekWake() {
-    def thermostatState = thermostat.currentthermostatMode
-    log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "auto"){
-		thermostat.setHeatingSetpoint(tempSetpointWakeHeat)
-    	thermostat.setCoolingSetpoint(tempSetpointWakeCool)
+	if(switchON != null){
+    	def currentState = switchON.currentValue("switch")
+		if (currentState == "on") {
+    		log.debug("switchON: $currentState")
+            def thermostatState = thermostat.currentthermostatMode
+            log.debug "checking mode request = $thermostatState"
+            if (thermostatState == "auto"){
+                thermostat.setHeatingSetpoint(tempSetpointWakeHeat)
+                thermostat.setCoolingSetpoint(tempSetpointWakeCool)
+            }
+            else if (thermostatState == "heat"){
+                thermostat.setHeatingSetpoint(tempSetpointWakeHeat)
+            }
+            else {
+                thermostat.setCoolingSetpoint(tempSetpointWakeCool)
+            }
+            log.debug "updating setpoints"
+            changeMode(newModeWake)
+    	}
+    	if (currentState == "off") {
+    		log.debug("switchON: $currentState")
+    	}
     }
-    else if (thermostatState == "heat"){
-		thermostat.setHeatingSetpoint(tempSetpointWakeHeat)
-    }
-    else {
-		thermostat.setCoolingSetpoint(tempSetpointWakeCool)
-    }
-    log.debug "updating setpoints"
-    changeMode(newModeWake)
 }
 def changetempWeekLeave() {
-    def thermostatState = thermostat.currentthermostatMode
-    log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "auto"){
-		thermostat.setHeatingSetpoint(tempSetpointLeaveHeat)
-    	thermostat.setCoolingSetpoint(tempSetpointLeaveCool)
+	if(switchON != null){
+    	def currentState = switchON.currentValue("switch")
+		if (currentState == "on") {
+    		log.debug("switchON: $currentState")
+            def thermostatState = thermostat.currentthermostatMode
+            log.debug "checking mode request = $thermostatState"
+            if (thermostatState == "auto"){
+                thermostat.setHeatingSetpoint(tempSetpointLeaveHeat)
+                thermostat.setCoolingSetpoint(tempSetpointLeaveCool)
+            }
+            else if (thermostatState == "heat"){
+                thermostat.setHeatingSetpoint(tempSetpointLeaveHeat)
+            }
+            else {
+                thermostat.setCoolingSetpoint(tempSetpointLeaveCool)
+            }
+            log.debug "updating setpoints"
+            changeMode(newModeLeave)
+    	}
+    	if (currentState == "off") {
+    		log.debug("switchON: $currentState")
+    	}
     }
-    else if (thermostatState == "heat"){
-		thermostat.setHeatingSetpoint(tempSetpointLeaveHeat)
-    }
-    else {
-		thermostat.setCoolingSetpoint(tempSetpointLeaveCool)
-    }
-    log.debug "updating setpoints"
-    changeMode(newModeLeave)
 }
 def changetempWeekReturn() {
-    def thermostatState = thermostat.currentthermostatMode
-    log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "auto"){
-		thermostat.setHeatingSetpoint(tempSetpointReturnHeat)
-    	thermostat.setCoolingSetpoint(tempSetpointReturnCool)
-    }
-    else if (thermostatState == "heat"){
-		thermostat.setHeatingSetpoint(tempSetpointReturnHeat)
-        if(switchAC != null) {
-    		log.debug "switchAC zone On"
-    		switchAC.on()
+	if(switchON != null){
+    	def currentState = switchON.currentValue("switch")
+		if (currentState == "on") {
+    		log.debug("switchON: $currentState")
+            def thermostatState = thermostat.currentthermostatMode
+            log.debug "checking mode request = $thermostatState"
+            if (thermostatState == "auto"){
+                thermostat.setHeatingSetpoint(tempSetpointReturnHeat)
+                thermostat.setCoolingSetpoint(tempSetpointReturnCool)
+            }
+            else if (thermostatState == "heat"){
+                thermostat.setHeatingSetpoint(tempSetpointReturnHeat)
+                if(switchAC != null) {
+                    log.debug "switchAC zone On"
+                    switchAC.on()
+                }
+            }
+            else {
+                thermostat.setCoolingSetpoint(tempSetpointReturnCool)
+            }
+            log.debug "updating setpoints"
+            changeMode(newModeReturn)
+    	}
+    	if (currentState == "off") {
+    		log.debug("switchON: $currentState")
     	}
     }
-    else {
-		thermostat.setCoolingSetpoint(tempSetpointReturnCool)
-    }
-    log.debug "updating setpoints"
-    changeMode(newModeReturn)
 }
 def changetempWeekSleep() {
-    def thermostatState = thermostat.currentthermostatMode
-    log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "auto"){
-		thermostat.setHeatingSetpoint(tempSetpointSleepHeat)
-    	thermostat.setCoolingSetpoint(tempSetpointSleepCool)
-    }
-    else if (thermostatState == "heat"){
-		thermostat.setHeatingSetpoint(tempSetpointSleepHeat)
-        if(switchAC != null) {
-    		log.debug "switchAC zone Off"
-    		switchAC.off()
+	if(switchON != null){
+    	def currentState = switchON.currentValue("switch")
+		if (currentState == "on") {
+    		log.debug("switchON: $currentState")
+            def thermostatState = thermostat.currentthermostatMode
+            log.debug "checking mode request = $thermostatState"
+            if (thermostatState == "auto"){
+                thermostat.setHeatingSetpoint(tempSetpointSleepHeat)
+                thermostat.setCoolingSetpoint(tempSetpointSleepCool)
+            }
+            else if (thermostatState == "heat"){
+                thermostat.setHeatingSetpoint(tempSetpointSleepHeat)
+                if(switchAC != null) {
+                    log.debug "switchAC zone Off"
+                    switchAC.off()
+                }
+            }
+            else {
+                thermostat.setCoolingSetpoint(tempSetpointSleepCool)
+            }
+            log.debug "updating setpoints"
+            changeMode(newModeSleep)
+    	}
+    	if (currentState == "off") {
+    		log.debug("switchON: $currentState")
     	}
     }
-    else {
-		thermostat.setCoolingSetpoint(tempSetpointSleepCool)
-    }
-    log.debug "updating setpoints"
-    changeMode(newModeSleep)
 }
 
 def changetempWeekEndWake() {
-    def thermostatState = thermostat.currentthermostatMode
-    log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "auto"){
-		thermostat.setHeatingSetpoint(tempSetpointWakeHeatWE)
-    	thermostat.setCoolingSetpoint(tempSetpointWakeCoolWE)
+	if(switchON != null){
+    	def currentState = switchON.currentValue("switch")
+		if (currentState == "on") {
+    		log.debug("switchON: $currentState")
+            def thermostatState = thermostat.currentthermostatMode
+            log.debug "checking mode request = $thermostatState"
+            if (thermostatState == "auto"){
+                thermostat.setHeatingSetpoint(tempSetpointWakeHeatWE)
+                thermostat.setCoolingSetpoint(tempSetpointWakeCoolWE)
+            }
+            else if (thermostatState == "heat"){
+                thermostat.setHeatingSetpoint(tempSetpointWakeHeatWE)
+            }
+            else {
+                thermostat.setCoolingSetpoint(tempSetpointWakeCoolWE)
+            }
+            log.debug "updating setpoints"
+            changeMode(newModeWake)
+    	}
+    	if (currentState == "off") {
+    		log.debug("switchON: $currentState")
+    	}
     }
-    else if (thermostatState == "heat"){
-		thermostat.setHeatingSetpoint(tempSetpointWakeHeatWE)
-    }
-    else {
-		thermostat.setCoolingSetpoint(tempSetpointWakeCoolWE)
-    }
-    log.debug "updating setpoints"
-    changeMode(newModeWake)
 }
 def changetempWeekEndLeave() {
-    def thermostatState = thermostat.currentthermostatMode
-    log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "auto"){
-		thermostat.setHeatingSetpoint(tempSetpointLeaveHeatWE)
-    	thermostat.setCoolingSetpoint(tempSetpointLeaveCoolWE)
+	if(switchON != null){
+    	def currentState = switchON.currentValue("switch")
+		if (currentState == "on") {
+    		log.debug("switchON: $currentState")
+            def thermostatState = thermostat.currentthermostatMode
+            log.debug "checking mode request = $thermostatState"
+            if (thermostatState == "auto"){
+                thermostat.setHeatingSetpoint(tempSetpointLeaveHeatWE)
+                thermostat.setCoolingSetpoint(tempSetpointLeaveCoolWE)
+            }
+            else if (thermostatState == "heat"){
+                thermostat.setHeatingSetpoint(tempSetpointLeaveHeatWE)
+            }
+            else {
+                thermostat.setCoolingSetpoint(tempSetpointLeaveCoolWE)
+            }
+            log.debug "updating setpoints"
+            changeMode(newModeLeave)
+    	}
+    	if (currentState == "off") {
+    		log.debug("switchON: $currentState")
+    	}
     }
-    else if (thermostatState == "heat"){
-		thermostat.setHeatingSetpoint(tempSetpointLeaveHeatWE)
-    }
-    else {
-		thermostat.setCoolingSetpoint(tempSetpointLeaveCoolWE)
-    }
-    log.debug "updating setpoints"
-    changeMode(newModeLeave)
 }
 def changetempWeekEndReturn() {
-    def thermostatState = thermostat.currentthermostatMode
-    log.debug "checking mode request = $thermostatState"
-    if (thermostatState == "auto"){
-		thermostat.setHeatingSetpoint(tempSetpointReturnHeatWE)
-    	thermostat.setCoolingSetpoint(tempSetpointReturnCoolWE)
-    }
-    else if (thermostatState == "heat"){
-		thermostat.setHeatingSetpoint(tempSetpointReturnHeatWE)
-        if(switchAC != null) {
-    		log.debug "switchAC zone On"
-    		switchAC.on()
+	if(switchON != null){
+    	def currentState = switchON.currentValue("switch")
+		if (currentState == "on") {
+    		log.debug("switchON: $currentState")
+            def thermostatState = thermostat.currentthermostatMode
+            log.debug "checking mode request = $thermostatState"
+            if (thermostatState == "auto"){
+                thermostat.setHeatingSetpoint(tempSetpointReturnHeatWE)
+                thermostat.setCoolingSetpoint(tempSetpointReturnCoolWE)
+            }
+            else if (thermostatState == "heat"){
+                thermostat.setHeatingSetpoint(tempSetpointReturnHeatWE)
+                if(switchAC != null) {
+                    log.debug "switchAC zone On"
+                    switchAC.on()
+                }
+            }
+            else {
+                thermostat.setCoolingSetpoint(tempSetpointReturnCoolWE)
+            }
+            log.debug "updating setpoints"
+            changeMode(newModeReturn)
+    	}
+    	if (currentState == "off") {
+    		log.debug("switchON: $currentState")
     	}
     }
-    else {
-		thermostat.setCoolingSetpoint(tempSetpointReturnCoolWE)
-    }
-    log.debug "updating setpoints"
-    changeMode(newModeReturn)
 }
 def changetempWeekEndSleep() {
-    def thermostatState = thermostat.currentthermostatMode
-    log.debug "checking mode request = $thermostatState"
-	if (thermostatState == "auto"){
-		thermostat.setHeatingSetpoint(tempSetpointSleepHeatWE)
-    	thermostat.setCoolingSetpoint(tempSetpointSleepCoolWE)
-    }
-    else if (thermostatState == "heat"){
-		thermostat.setHeatingSetpoint(tempSetpointSleepHeatWE)
-        if(switchAC != null) {
-    		log.debug "switchAC zone Off"
-    		switchAC.off()
+	if(switchON != null){
+    	def currentState = switchON.currentValue("switch")
+		if (currentState == "on") {
+    		log.debug("switchON: $currentState")
+            def thermostatState = thermostat.currentthermostatMode
+            log.debug "checking mode request = $thermostatState"
+            if (thermostatState == "auto"){
+                thermostat.setHeatingSetpoint(tempSetpointSleepHeatWE)
+                thermostat.setCoolingSetpoint(tempSetpointSleepCoolWE)
+            }
+            else if (thermostatState == "heat"){
+                thermostat.setHeatingSetpoint(tempSetpointSleepHeatWE)
+                if(switchAC != null) {
+                    log.debug "switchAC zone Off"
+                    switchAC.off()
+                }
+            }
+            else {
+                thermostat.setCoolingSetpoint(tempSetpointSleepCoolWE)
+            }
+            log.debug "updating setpoints"
+            changeMode(newModeSleep)
+    	}
+    	if (currentState == "off") {
+    		log.debug("switchON: $currentState")
     	}
     }
-    else {
-		thermostat.setCoolingSetpoint(tempSetpointSleepCoolWE)
-    }
-    log.debug "updating setpoints"
-    changeMode(newModeSleep)
 }
 def changetempGone() {
-    def thermostatState = thermostat.currentthermostatMode
-    log.debug "checking mode request = $thermostatState"
-	if (thermostatState == "auto"){
-		thermostat.setHeatingSetpoint(tempSetpointGoneHeat)
-    	thermostat.setCoolingSetpoint(tempSetpointGoneCool)
+	if(switchON != null){
+    	def currentState = switchON.currentValue("switch")
+		if (currentState == "on") {
+    		log.debug("switchON: $currentState")
+                def thermostatState = thermostat.currentthermostatMode
+                log.debug "checking mode request = $thermostatState"
+                if (thermostatState == "auto"){
+                    thermostat.setHeatingSetpoint(tempSetpointGoneHeat)
+                    thermostat.setCoolingSetpoint(tempSetpointGoneCool)
+                }
+                else if (thermostatState == "heat"){
+                    thermostat.setHeatingSetpoint(tempSetpointGoneHeat)
+                }
+                else {
+                    thermostat.setCoolingSetpoint(tempSetpointGoneCool)
+                }
+                log.debug "updating setpoints"
+                changeMode(newModeAway)
+    	}
+    	if (currentState == "off") {
+    		log.debug("switchON: $currentState")
+    	}
     }
-    else if (thermostatState == "heat"){
-		thermostat.setHeatingSetpoint(tempSetpointGoneHeat)
-    }
-    else {
-		thermostat.setCoolingSetpoint(tempSetpointGoneCool)
-    }
-    log.debug "updating setpoints"
-    changeMode(newModeAway)
 }
 
 def presence(evt) {
