@@ -130,16 +130,15 @@ def modeChangeHandler(evt) {
 
 // This section sets the HVAC mode based outside temperature. HVAC fan mode is set to "auto".
 def temperatureHandler(evt) {
-if(switchON != null){
+	def lastTemp = temperatureSensor1.currentTemperature
+    def thermostatState = thermostat.currentthermostatMode
+    def thermostatFan = thermostat.currentthermostatFanMode
+    log.debug "lastTemp: $lastTemp thermostatState:$thermostatState thermostatFan:$thermostatFan"
+	if(switchON != null){
     	def currentStateON = switchON.currentValue("switch")
 		if (currentStateON == "on") {
     		log.debug("switchON: $currentStateON")
-                def lastTemp = temperatureSensor1.currentTemperature
-                def thermostatState = thermostat.currentthermostatMode
-                def thermostatFan = thermostat.currentthermostatFanMode
-                log.debug "lastTemp: $lastTemp thermostatState:$thermostatState thermostatFan:$thermostatFan"
-
-                if (lastTemp <= temperatureH) {
+            	if (lastTemp <= temperatureH) {
                     def hvacmode = "heat"
                     log.debug "HVAC mode set to $hvacmode"
                     thermostat.setThermostatMode(hvacmode)
@@ -180,6 +179,9 @@ if(switchON != null){
     	}
     	if (currentStateON == "off") {
     		log.debug("switchON: $currentStateON")
+            def hvacmode = "off"
+            log.debug "HVAC mode set to $hvacmode"
+            thermostat.setThermostatMode(hvacmode)
     	}
     }
 }
