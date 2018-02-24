@@ -121,6 +121,8 @@ def setup()
     subscribe(temperatureSensor1, "temperature", temperatureHandler)
     subscribe(thermostat, "thermostat", thermostatHandler)
     subscribe(people, "presence", presence)
+    subscribe(switchON, "switch.on", temperatureHandler)
+    subscribe(switchON, "switch.off", temperatureHandler)
 }
 
 def modeChangeHandler(evt) {
