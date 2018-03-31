@@ -89,14 +89,17 @@ metadata {
 			state "heatingSetpoint", action:"raiseCoolSetpoint", icon:"st.thermostat.thermostat-right"
 		}
 		standardTile("thermostatOperatingState", "device.thermostatOperatingState", width: 2, height:2, decoration: "flat") {
-			state "thermostatOperatingState", label:'${currentValue}', backgroundColor:"#ffffff"
+			state "thermostatOperatingState", label:'System\n${currentValue}', backgroundColor:"#ffffff"
 		}
 		standardTile("refresh", "device.thermostatMode", width:2, height:2, inactiveLabel: false, decoration: "flat") {
 			state "default", action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
+        standardTile("thermostatFanState", "device.thermostatFanState", width: 2, height:2, decoration: "flat") {
+			state "thermostatOperatingState", label:'Fan\n${currentValue}', backgroundColor:"#ffffff"
+		}
 		main "temperature"
 		details(["temperature", "lowerHeatingSetpoint", "heatingSetpoint", "raiseHeatingSetpoint", "lowerCoolSetpoint",
-				"coolingSetpoint", "raiseCoolSetpoint", "mode", "fanMode", "humidity", "thermostatOperatingState", "refresh"])
+				"coolingSetpoint", "raiseCoolSetpoint", "mode", "fanMode", "humidity", "thermostatOperatingState", "thermostatFanState","refresh"])
 	}
 }
 
@@ -207,6 +210,7 @@ def zwaveEvent(physicalgraph.zwave.commands.sensormultilevelv2.SensorMultilevelR
 		map.name = "temperature"
 		map.unit = getTemperatureScale()
 		map.value = getTempInLocalScale(cmd.scaledSensorValue, (cmd.scale == 1 ? "F" : "C"))
+        log.debug "cmd.scaledSensorValue2: ${cmd.scaledSensorValue}"
 		updateThermostatSetpoint(null, null)
 	} else if (cmd.sensorType == 5) {
 		map.name = "humidity"
@@ -222,6 +226,7 @@ def zwaveEvent(physicalgraph.zwave.commands.sensormultilevelv3.SensorMultilevelR
 		map.name = "temperature"
 		map.unit = getTemperatureScale()
 		map.value = getTempInLocalScale(cmd.scaledSensorValue, (cmd.scale == 1 ? "F" : "C"))
+        log.debug "cmd.scaledSensorValue3: ${cmd.scaledSensorValue}"
 		updateThermostatSetpoint(null, null)
 	} else if (cmd.sensorType == 5) {
 		map.value = cmd.scaledSensorValue
@@ -233,6 +238,7 @@ def zwaveEvent(physicalgraph.zwave.commands.sensormultilevelv3.SensorMultilevelR
 
 def zwaveEvent(physicalgraph.zwave.commands.thermostatoperatingstatev2.ThermostatOperatingStateReport cmd) {
 	def map = [name: "thermostatOperatingState"]
+    log.debug "thermostatOperatingStatev2: ${cmd.operatingState}"
 	switch (cmd.operatingState) {
 		case physicalgraph.zwave.commands.thermostatoperatingstatev2.ThermostatOperatingStateReport.OPERATING_STATE_IDLE:
 			map.value = "idle"
@@ -770,8 +776,9 @@ private getTimeAndDay() {
 // Get stored temperature from currentState in current local scale
 def getTempInLocalScale(state) {
 	def temp = device.currentState(state)
-	if (temp && temp.value && temp.unit) {
-		return getTempInLocalScale(temp.value.toBigDecimal(), temp.unit)
+	if (temp && temp.value && temp.unit) {	
+        return getTempInLocalScale(temp.value.toBigDecimal(), temp.unit)
+
 	}
 	return 0
 }
@@ -779,7 +786,7 @@ def getTempInLocalScale(state) {
 // get/convert temperature to current local scale
 def getTempInLocalScale(temp, scale) {
 	if (temp && scale) {
-		def scaledTemp = convertTemperatureIfNeeded(temp.toBigDecimal(), scale).toDouble()
+        def scaledTemp = convertTemperatureIfNeeded(temp.toBigDecimal(), scale).toDouble()
 		return (getTemperatureScale() == "F" ? scaledTemp.round(0).toInteger() : roundC(scaledTemp))
 	}
 	return 0
@@ -788,7 +795,7 @@ def getTempInLocalScale(temp, scale) {
 def getTempInDeviceScale(state) {
 	def temp = device.currentState(state)
 	if (temp && temp.value && temp.unit) {
-		return getTempInDeviceScale(temp.value.toBigDecimal(), temp.unit)
+        return getTempInDeviceScale(temp.value.toBigDecimal(), temp.unit)
 	}
 	return 0
 }
