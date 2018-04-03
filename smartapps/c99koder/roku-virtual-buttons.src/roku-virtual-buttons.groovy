@@ -25,9 +25,21 @@ definition(
 
 
 preferences {
-	section("Title") {
-		input "roku","capability.mediaController", title: "Roku Device", multiple: false, required: true
+    page(name: "page1", title: "Select Roku Device", nextPage: "page2", uninstall: true) {
+    	section("Title") {
+            input "roku","capability.mediaController", title: "Roku Device", multiple: false, required: true
+        }
 	}
+    page(name: "page2", title: "Select Channels", install: true, uninstall: true)
+}
+
+def page2() {
+    def switchChannels = ChannelsDiscovered()
+    dynamicPage(name: "page2") {
+        section("Channels") {
+            input "selectedChannels", "enum", required:false, title:"Select Channels\n(${switchChannels.size() ?: 0} found)", multiple:true, options:switchChannels
+        }
+    }
 }
 
 def installed() {
@@ -35,6 +47,9 @@ def installed() {
 }
 
 def updated() {
+	getAllChildDevices().each {
+        	subscribe(it, "switch", switchHandler)
+    }
 	unsubscribe()
 	initialize()
 }
@@ -54,9 +69,14 @@ def createButtons(evt) {
             def appId = it.@id.toString()
             def deviceLabel = it.text()
             if (getChildDevice(appId) == null) {
-                def device = addChildDevice("smartthings", "Momentary Button Tile", appId, null, [label: "Roku: $deviceLabel"])
-                state["$device.id"] = appId
-                log.debug "Created button tile $device.id for channel $deviceLabel ($appId)"
+                selectedChannels.each { id ->
+                log.debug "Checking $id against $appId"
+                	if(id == appId){
+                		def device = addChildDevice("smartthings", "Momentary Button Tile", appId, null, [label: "Roku: $deviceLabel"])
+                		state["$device.id"] = appId
+                		log.debug "Created button tile $device.id for channel $deviceLabel ($appId)"
+                    	}
+                    }
             } else {
                 log.debug "Skipped $appId"
             }
@@ -97,4 +117,22 @@ def switchHandler(evt) {
 	    	roku.launchAppId(state["$evt.device.id"])
         }
     }
+}
+
+Map ChannelsDiscovered() {
+	roku.getAllActivities()
+    def devicemap = [:]
+	def activityList = roku.currentValue("activityList")
+    if (activityList != null) {
+        def appsNode = new XmlSlurper().parseText(activityList)
+        appsNode.children().each{
+            def appId = it.@id.toString()
+            def deviceLabel = it.text()
+            log.debug "ChannelsDiscovered: $deviceLabel ($appId)"
+			def value = deviceLabel
+			def key =  appId
+			devicemap["${key}"] = value
+        }
+	}
+	return devicemap
 }
