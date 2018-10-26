@@ -186,6 +186,7 @@ def temperatureHandler(evt) {
             thermostat.setThermostatMode(hvacmode)
     	}
     }
+    initialize()
 }
 
 // This section determines which day it is.
